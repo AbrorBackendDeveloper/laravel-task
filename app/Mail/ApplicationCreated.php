@@ -2,23 +2,25 @@
 
 namespace App\Mail;
 
+use App\Models\Application;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Attachment;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 class ApplicationCreated extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
+    public Application $application;
+    
+    public function __construct(Application $application)
     {
-        //
+        $this->application = $application;
     }
 
     /**
@@ -27,6 +29,7 @@ class ApplicationCreated extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
+            from: new Address('example@gmail.com', 'Abror'),
             subject: 'Application Created',
         );
     }
@@ -37,7 +40,7 @@ class ApplicationCreated extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.application-created',
         );
     }
 
@@ -48,6 +51,13 @@ class ApplicationCreated extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        if ($this->application->file) {
+            return [
+                Attachment::fromPath($this->application->file_url)
+                    ->as('application-file.pdf')
+            ];
+        }
+    
+        return []; // Hech qanday fayl bo'lmasa, bo'sh array qaytaring
     }
 }

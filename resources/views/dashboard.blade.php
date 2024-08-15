@@ -43,7 +43,7 @@
                                         </div>
                                     </div>
                                     @endforeach
-                                    {{ $applications->links }}
+                                    {{ $applications->links() }}
                                 </div>
                                 @else
                     <div class='flex items-center justify-center min-h-screen from-teal-100 via-teal-300 to-teal-500 bg-gradient-to-br'>
