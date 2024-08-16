@@ -13,6 +13,12 @@ use App\Http\Requests\StoreApplicationRequest;
 
 class ApplicationController extends Controller
 {
+
+    public function index()
+    {
+        return view('Applications.index',)->with(['applications' => auth()->user()->applications()->paginate(10)]);
+    }
+
     public function store(StoreApplicationRequest $request)
     {
         $userId = auth()->id();
@@ -37,6 +43,8 @@ class ApplicationController extends Controller
         return redirect()->back();
     }
 
+
+    
     protected function hasUserPostedToday($userId)
     {
         return Application::where('user_id', $userId)

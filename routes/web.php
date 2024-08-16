@@ -10,7 +10,7 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/', [MainController::class, 'main'])->name('main');
     Route::get('/dashboard', [MainController::class, 'dashboard'])->name('dashboard');
 
-    Route::get('applications/{application}/answer', [AnswerController::class, 'create'])->name('answer.create');
+    Route::get('applications/{application}/answer', [AnswerController::class, 'create'])->name('answer.create')->middleware('checkManager');
     Route::post('applications/{application}/answer', [AnswerController::class, 'store'])->name('answer.store');
 
     Route::resource('application', ApplicationController::class);
