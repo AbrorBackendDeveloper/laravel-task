@@ -9,12 +9,13 @@ use App\Models\Application;
 use Illuminate\Http\Request;
 use App\Mail\ApplicationCreated;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Requests\StoreApplicationRequest;
 
 class ApplicationController extends Controller
 {
-    public function store(Request $request)
+    public function store(StoreApplicationRequest $request)
     {
-        $userId = auth()->id;
+        $userId = auth()->id();
 
         if ($this->hasUserPostedToday($userId)) {
             return back()->with('error', 'Siz bugun faqat bitta post yaratishingiz mumkin.');
@@ -23,12 +24,6 @@ class ApplicationController extends Controller
         $path = $request->hasFile('file')
             ? $request->file('file')->storeAs('files', $request->file('file')->getClientOriginalName(), 'public')
             : null;
-
-        $request->validate([
-            'subject' => 'required|max:255',
-            'message' => 'required|max:1000',
-            'file' => 'file|mimes:png,jpg,pdf'
-        ]);
 
         $application = Application::create([
             'user_id' => $userId,
