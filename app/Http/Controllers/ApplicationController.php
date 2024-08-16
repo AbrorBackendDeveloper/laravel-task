@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Jobs\SendEmailJob;
 use App\Models\Application;
@@ -13,15 +14,15 @@ class ApplicationController extends Controller
 {
     public function store(Request $request)
     {
-        if ($request->hasFile('file'))
-        {
-            $name = $request->file('file')->getClientOriginalName();
-            $path = $request->file('file')->storeAs(
-                'files',
-                 $name,
-                'public'
-            );
+        $userId = auth()->id;
+
+        if ($this->hasUserPostedToday($userId)) {
+            return back()->with('error', 'Siz bugun faqat bitta post yaratishingiz mumkin.');
         }
+
+        $path = $request->hasFile('file')
+            ? $request->file('file')->storeAs('files', $request->file('file')->getClientOriginalName(), 'public')
+            : null;
 
         $request->validate([
             'subject' => 'required|max:255',
@@ -30,14 +31,21 @@ class ApplicationController extends Controller
         ]);
 
         $application = Application::create([
-            'user_id' => auth()->user()->id,
+            'user_id' => $userId,
             'subject' => $request->subject,
             'message' => $request->message,
-            'file_url' => $path ?? null
+            'file_url' => $path,
         ]);
 
         dispatch(new SendEmailJob($application));
 
         return redirect()->back();
+    }
+
+    protected function hasUserPostedToday($userId)
+    {
+        return Application::where('user_id', $userId)
+            ->whereDate('created_at', Carbon::today())
+            ->exists();
     }
 }
